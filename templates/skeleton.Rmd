@@ -1,0 +1,46 @@
+---
+title: "PubMed recap summary"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: 
+  html_document: 
+    toc: yes
+params:
+  subject: NULL
+  nsentences: NULL
+  model: NULL
+  host: NULL
+  output_csv: NULL
+  paper_summaries: NULL
+---
+
+## Report information
+
+Report produced on `r format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")`. Inspired by [biorecap](https://github.com/stephenturner/biorecap)
+
+- **Version**: `r packageVersion("biorecap")`
+- **Model**: `r attr(params$paper_summaries, 'model')`
+- **Start Date**: `r attr(params$paper_summaries, 'start_date')`
+- **End Date**: `r attr(params$paper_summaries, 'end_date')`
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE)
+```
+
+```{r summarize-papers}
+pp <- params$paper_summaries
+write.csv(pp, params$output_csv, row.names = FALSE)
+```
+
+
+```{r write-report-content, results='asis'}
+for (i in unique(pp$subject)) {
+  cat("##", sprintf("%s", gsub("_", " ", i)), "\n\n")
+  pp |> 
+    dplyr::filter(subject==i) |> 
+    tt_preprints() |> 
+    tinytable::knit_print.tinytable() |>
+    cat()
+}
+```
+
